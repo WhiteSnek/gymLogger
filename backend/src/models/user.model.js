@@ -1,6 +1,6 @@
-import mongoose, {Schema} from "mongoose";
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
+import mongoose, { Schema } from "mongoose";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 const userSchema = new Schema({
     username: {
@@ -18,25 +18,30 @@ const userSchema = new Schema({
         lowercase: true,
         trim: true,
     },
-    fullname: {
+    name: {
         type: String,
         required: true,
         trim: true,
         index: true
     },
     avatar: {
-        type: String, //cloudinary url
+        type: String,
         required: true,
     },
     password: {
         type: String,
-        required: [true, "Password is required"]
     },
     age: {
         type: Number,
     },
     gender: {
         type: String,
+    },
+    weight: {
+        type: Number
+    },
+    googleId: {
+        type: String
     },
     refreshToken: {
         type: String
@@ -50,44 +55,58 @@ const userSchema = new Schema({
 },
 {
     timestamps: true
-})
+});
 
-userSchema.pre("save",async function(next){
-    if(!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
-})
 
-userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password, this.password)
-}
+userSchema.pre("save", async function(next) {
+    if (this.password && this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 10);
+        // Ensure googleId is not set when password is modified
+        this.googleId = undefined;
+    } else if (this.googleId && this.isModified("googleId")) {
+        this.googleId = await bcrypt.hash(this.googleId, 10);
+        // Ensure password is not set when googleId is modified
+        this.password = undefined;
+    }
+    next();
+});
 
-userSchema.methods.generateAccessToken = function(){
+userSchema.methods.isPasswordCorrect = async function(password) {
+    if (!this.password) return false; // Handle case where password is not set
+    return await bcrypt.compare(password, this.password);
+};
+
+userSchema.methods.isGoogleIdCorrect = async function(googleId) {
+    if (!this.googleId) return false; // Handle case where googleId is not set
+    return await bcrypt.compare(googleId, this.googleId);
+};
+
+userSchema.methods.generateAccessToken = function() {
     return jwt.sign({
             _id: this._id,
             email: this.email,
             username: this.username,
-            fullname: this.fullname,
+            name: this.name,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
-    )
-}
+    );
+};
 
-userSchema.methods.generateRefreshToken = function(){
+userSchema.methods.generateRefreshToken = function() {
     return jwt.sign({
             _id: this._id,
             email: this.email,
             username: this.username,
-            fullname: this.fullname,
+            name: this.name,
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
             expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
-    )
-}
+    );
+};
 
-export const User = mongoose.model("User",userSchema);
+export const User = mongoose.model("User", userSchema);

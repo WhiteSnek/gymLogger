@@ -3,8 +3,11 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
+import axios from 'axios'
 
 import {Home, Login, Register} from './pages'
+
+axios.defaults.baseURL = import.meta.env.VITE_SERVER_URI;
 
 const Layout = () => {
   const router = createBrowserRouter(

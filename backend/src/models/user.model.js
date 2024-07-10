@@ -59,14 +59,13 @@ const userSchema = new Schema({
 
 
 userSchema.pre("save", async function(next) {
-    if (this.password && this.isModified("password")) {
+    if (this.isModified("password")) {
         this.password = await bcrypt.hash(this.password, 10);
         // Ensure googleId is not set when password is modified
-        this.googleId = undefined;
-    } else if (this.googleId && this.isModified("googleId")) {
+    }
+    if (this.isModified("googleId")) {
         this.googleId = await bcrypt.hash(this.googleId, 10);
         // Ensure password is not set when googleId is modified
-        this.password = undefined;
     }
     next();
 });

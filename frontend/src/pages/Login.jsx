@@ -80,8 +80,8 @@ const Login = () => {
   };
   
   return (
-    <div className="fixed w-screen h-screen login-bg flex justify-center items-center">
-      <div className="w-1/3 p-10 bg-gray-400 rounded-md bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-10 border border-gray-100">
+    <div className=" w-screen h-[90vh] login-bg flex justify-center items-center">
+      <div className="w-1/3 scale-90 p-10 bg-gray-800 rounded-md bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-10 border border-gray-100">
         <h1 className="text-4xl font-bold text-gray-200 text-center">Login</h1>
         <div className="flex flex-col justify-center items-center mt-10 w-full border-b-2 border-white pb-8">
           <GoogleLogin

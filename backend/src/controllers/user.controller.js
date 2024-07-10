@@ -23,21 +23,18 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from front end
-  const { name, email, username, password, googleId, age, gender } = req.body;
-
+  const { name, email, username, password, googleId, age, gender, weight,googleImg } = req.body;
+  console.log(password,googleId)
   // validation - ensure required fields are not empty
   if (
-    [name, email, username, age, gender].some((field) => field?.trim() === "")
+    [name, email, username, age, gender, weight].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All fields are required");
   }
 
   // Ensure either password or googleId is provided, but not both
-  if (!password && !googleId) {
-    throw new ApiError(400, "Either password or googleId is required");
-  }
-  if (password && googleId) {
-    throw new ApiError(400, "Provide either password or googleId, not both");
+  if (!password) {
+    throw new ApiError(400, "password is required");
   }
 
   // check if user already exists: username and email
@@ -49,29 +46,32 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // check for images
   const avatarLocalPath = req.file?.path;
-
   // check for avatar
-  if (!avatarLocalPath) throw new ApiError(400, "Avatar file is required");
+  if (!avatarLocalPath && !googleImg) throw new ApiError(400, "Avatar file is required");
 
   // upload avatar to cloudinary
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
+  if(avatarLocalPath){
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
   if (!avatar) throw new ApiError(400, "Avatar file is required on cloudinary");
+  }
+  
 
   // create user object - create entry in db
   const user = await User.create({
     name,
-    avatar: avatar.url,
+    avatar: avatarLocalPath ? avatar.url : googleImg,
     email,
-    password: password || undefined,
-    googleId: googleId || undefined,
+    password: password,
+    googleId: googleId,
     username: username.toLowerCase(),
     age,
     gender,
+    weight
   });
 
   // remove password and refresh token field from response
   const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken"
+    "-refreshToken"
   );
 
   // check for user creation

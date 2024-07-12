@@ -5,7 +5,7 @@ import './index.css'
 import { Route, createBrowserRouter, createRoutesFromElements, RouterProvider } from 'react-router-dom'
 import axios from 'axios'
 
-import {Dashboard, Home, Login, Register} from './pages'
+import {Profile, Home, Login, Register} from './pages'
 
 axios.defaults.baseURL = import.meta.env.VITE_SERVER_URI;
 
@@ -16,7 +16,7 @@ const Layout = () => {
         <Route path='' element={<Home />} />
         <Route path='login' element={<Login />} />
         <Route path='register' element={<Register />} />
-        <Route path='dashboard' element={<Dashboard />} />
+        <Route path='profile' element={<Profile />} />
       </Route>
     )
   )

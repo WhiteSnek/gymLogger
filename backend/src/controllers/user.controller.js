@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { Plan } from "../models/plan.model.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
@@ -166,4 +167,14 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
-export { loginUser, logoutUser, registerUser };
+const addPlan = asyncHandler( async(req,res)=>{
+  const { details } = req.body;
+    const userId = req.user._id;
+    const plan = await Plan.create(details)
+    if(!plan) throw new ApiError(400,'Error creating plan')
+    const user = await User.findByIdAndUpdate(userId, { $push: { plans: plan._id } });
+    if(!user) throw new ApiError(404,'User not found')
+    return res.status(200).json(new ApiResponse(200, {}, 'Plan added successfully'));
+})
+
+export { loginUser, logoutUser, registerUser, addPlan };

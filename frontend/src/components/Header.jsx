@@ -4,7 +4,7 @@ import { Logo } from '../assets'
 
 const Header = () => {
   return (
-    <header className='flex justify-between p-4 bg-black text-white'>
+    <header className='flex sticky top-0 justify-between p-4 z-50 bg-black text-white'>
       <div className='flex gap-2 items-center'>
         <img src={Logo} alt='logo' className='h-10 aspect-square' />
         <p className='text-lg bowlby-one-regular'>Gym Logger</p>

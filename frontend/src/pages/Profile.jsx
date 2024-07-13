@@ -5,7 +5,7 @@ import Dashboard from '../components/Profile/Dashboard/Dashboard';
 import NewPlan from '../components/Profile/NewPlan/NewPlan';
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState('log-workout');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   const changeTab = (tab) => {
     setActiveTab(tab);

@@ -18,7 +18,7 @@ const darkTheme = createTheme({
   },
 });
 
-const Schedule = () => {
+const Schedule = ({ addMuscle, addExercise, addSet, dayIndex, day }) => {
   const initialMuscles = [
     "Chest",
     "Back",
@@ -27,12 +27,13 @@ const Schedule = () => {
     "Shoulders",
     "Legs",
     "Abs",
-    "",
   ];
+  const [muscleExercises,setMuscleExercises] = useState([])
+  const [exerciseSets,setExerciseSets] = useState([])
   const [muscleGroups, setMuscleGroups] = useState([
     { value: "", options: initialMuscles },
   ]);
-
+  // console.log("exercises",exercises)
   const addMuscleGroup = () => {
     if (muscleGroups.length < 3) {
       setMuscleGroups([
@@ -50,15 +51,33 @@ const Schedule = () => {
   };
 
   const selectedMuscles = muscleGroups.map((muscleGroup) => muscleGroup.value);
-  console.log(selectedMuscles);
+
+  const handleAddSchedule = () => {
+    if (selectedMuscles[0] !== "") {
+       // Add the day with selected muscle groups
+      selectedMuscles.forEach((muscle,muscleIndex) => {
+        if (muscle) {
+          addMuscle(dayIndex, muscle);
+          muscleExercises.forEach(exercise => {
+            if(exercise) {
+              addExercise(dayIndex, muscleIndex, exercise)
+              exerciseSets.forEach((set,exerciseIndex)=>{
+                if(set) {
+                  addSet(dayIndex,muscleIndex,exerciseIndex,set);
+                }
+              })
+            }
+          })
+        }
+      });
+    }
+  };
+  
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Box sx={{ p: 4, borderRadius: 2, color: "white", position: "relative" }}>
-        <Stack
-          spacing={4}
-          direction={"row"}
-          sx={{ display: "flex", alignItems: "center" }}
-        >
+        <Stack spacing={4} direction={"row"} sx={{ display: "flex", alignItems: "center" }}>
           <Typography align="center" sx={{ fontSize: "1rem" }}>
             Select Muscle Groups
           </Typography>
@@ -92,7 +111,7 @@ const Schedule = () => {
           )}
         </Stack>
         {selectedMuscles[0] !== "" && (
-          <Exercises selectedMuscles={selectedMuscles} />
+          <Exercises setMuscleExercises={setMuscleExercises} setExrciseSets={setExerciseSets} selectedMuscles={selectedMuscles} />
         )}
         <Box
           sx={{
@@ -108,6 +127,7 @@ const Schedule = () => {
               color: "black",
               "&:hover": { backgroundColor: "lightgray" },
             }}
+            onClick={handleAddSchedule}
           >
             Add Schedule
           </Button>

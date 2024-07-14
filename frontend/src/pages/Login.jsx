@@ -40,7 +40,7 @@ const Login = () => {
         { withCredentials: true }
       );
       console.log(response);
-      // navigate('/')
+      navigate('/profile')
     } catch (error) {
       const errorMessage = error.response.data.match(
         /<pre>Error: (.*?)<br>/
@@ -70,7 +70,7 @@ const Login = () => {
         username: "",
         password: "",
       })
-      // navigate('/')
+      navigate('/profile')
     } catch (error) {
       const errorMessage = error.response.data.match(
         /<pre>Error: (.*?)<br>/
@@ -78,7 +78,6 @@ const Login = () => {
       setError(errorMessage)
     }
   };
-  
   return (
     <div className=" w-screen h-[90vh] login-bg flex justify-center items-center">
       <div className="w-1/3 scale-90 p-10 bg-gray-800 rounded-md bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-10 border border-gray-100">
@@ -92,6 +91,7 @@ const Login = () => {
             cookiePolicy={"single_host_origin"}
             isSignedIn={true}
             className="w-3/4 flex justify-center text-lg"
+            scope="profile email"
           />
         </div>
         <form className="text-white p-10 flex flex-col gap-4 justify-end" onSubmit={signIn}>

@@ -1,21 +1,21 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const scheduleSchema = new Schema({
+const scheduleSchema = new Schema(
+  {
+    day: {
+        type: String,
+        required: true
+    },
     muscles: [
-        {
-            type: String,
-            required: true
-        }
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Muscle",
+      },
     ],
-    exercise: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "Exercise",
-            required: true
-        }
-    ]
-},{
-    timestamps: true
-})
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export const Schedule = mongoose.model('Schedule',scheduleSchema);
+export const Schedule = mongoose.model("Schedule", scheduleSchema);

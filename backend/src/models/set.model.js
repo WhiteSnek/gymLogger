@@ -3,12 +3,10 @@ import mongoose, { Schema } from "mongoose";
 const setSchema = new Schema(
   {
     reps: {
-      type: Number,
-      required: true,
+      type: Number
     },
     weight: {
-      type: Number,
-      required: true,
+      type: Number
     }
   },
   {
@@ -16,4 +14,4 @@ const setSchema = new Schema(
   }
 );
 
-const Set = mongoose.model("Set", setSchema);
+export const Set = mongoose.model("Set", setSchema);

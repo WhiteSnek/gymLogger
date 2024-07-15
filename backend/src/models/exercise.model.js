@@ -6,16 +6,10 @@ const exerciseSchema = new Schema(
       type: String,
       required: true,
     },
-    equipment: {
-      type: String,
-    },
-    muscleGroup: {
-      type: String,
-    },
-    sets: {
+    sets: [{
       type: Schema.Types.ObjectId,
       ref: "Set",
-    },
+    }],
   },
   {
     timestamps: true,

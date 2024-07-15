@@ -4,7 +4,10 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Plan } from "../models/plan.model.js";
-import jwt from "jsonwebtoken";
+import { Schedule } from "../models/schedule.model.js";
+import { Muscle } from "../models/muscle.model.js";
+import { Exercise } from "../models/exercise.model.js";
+import { Set } from "../models/set.model.js";
 import mongoose from "mongoose";
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -167,14 +170,129 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
-const addPlan = asyncHandler( async(req,res)=>{
-  const { details } = req.body;
-    const userId = req.user._id;
-    const plan = await Plan.create(details)
-    if(!plan) throw new ApiError(400,'Error creating plan')
-    const user = await User.findByIdAndUpdate(userId, { $push: { plans: plan._id } });
-    if(!user) throw new ApiError(404,'User not found')
-    return res.status(200).json(new ApiResponse(200, {}, 'Plan added successfully'));
-})
 
-export { loginUser, logoutUser, registerUser, addPlan };
+const addPlan = asyncHandler(async (req, res) => {
+  const { planData, planName } = req.body;
+  const userId = req.user._id;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // Step 1: Create Sets
+    const setIds = [];
+    for (const schedule of planData) {
+      for (const muscle of schedule.muscles) {
+        for (const exercise of muscle.exercises) {
+          const sets = await Set.insertMany(exercise.exercise.sets, { session });
+          if(!sets) throw new ApiError(400,"Error adding sets")
+          setIds.push(sets.map(set => set._id));
+        }
+      }
+    }
+
+    // Step 2: Create Exercises
+    const exerciseIds = [];
+    let setIndex = 0;
+    for (const schedule of planData) {
+      for (const muscle of schedule.muscles) {
+        for (const exercise of muscle.exercises) {
+          const newExercise = new Exercise({
+            name: exercise.exercise.value,
+            sets: setIds[setIndex],
+          });
+          if(!newExercise) throw new ApiError(400,"Error adding exercise")
+          await newExercise.save({ session });
+          exerciseIds.push(newExercise._id);
+          setIndex++;
+        }
+      }
+    }
+
+    // Step 3: Create Muscles
+    const muscleIds = [];
+    let exerciseIndex = 0;
+    for (const schedule of planData) {
+      for (const muscle of schedule.muscles) {
+        const newMuscle = new Muscle({
+          name: muscle.name,
+          exercises: exerciseIds.slice(exerciseIndex, exerciseIndex + muscle.exercises.length),
+        });
+        if(!newMuscle) throw new ApiError(400,"Error adding muscle")
+        await newMuscle.save({ session });
+        muscleIds.push(newMuscle._id);
+        exerciseIndex += muscle.exercises.length;
+      }
+    }
+
+    // Step 4: Create Schedules
+    const scheduleIds = [];
+    let muscleIndex = 0;
+    for (const schedule of planData) {
+      const newSchedule = new Schedule({
+        day: schedule.day,
+        muscles: muscleIds.slice(muscleIndex, muscleIndex + schedule.muscles.length),
+      });
+      if(!newSchedule) throw new ApiError(400,"Error adding schedule")
+      await newSchedule.save({ session });
+      scheduleIds.push(newSchedule._id);
+      muscleIndex += schedule.muscles.length;
+    }
+
+    // Step 5: Create Plan
+    const newPlan = new Plan({
+      name: planName, 
+      schedule: scheduleIds,
+    });
+    if(!newPlan) throw new ApiError(400,"Error adding plan")
+    await newPlan.save({ session });
+
+    // Step 6: Update User
+    const user = await User.findById(userId).session(session);
+    user.plans.push(newPlan._id);
+    await user.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(200).json(new ApiResponse(200, { planId: newPlan._id }, 'Plan added successfully'));
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw new ApiError(400, error)
+  }
+});
+
+
+const getPlanInfo = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    const user = await User.findById(userId)
+      .populate({
+        path: 'plans',
+        populate: {
+          path: 'schedule',
+          populate: {
+            path: 'muscles',
+            populate: {
+              path: 'exercises',
+              populate: {
+                path: 'sets'
+              }
+            }
+          }
+        }
+      }).select("-password -googleId -refreshToken");
+
+    if (!user) {
+      throw new ApiError(400,"Error fetching plan info")
+    }
+
+    return res.status(200).json(new ApiResponse(200, user, 'User data retrieved successfully'));
+  } catch (error) {
+    throw new ApiError(400,error)
+  }
+});
+
+
+export { loginUser, logoutUser, registerUser, addPlan, getPlanInfo };

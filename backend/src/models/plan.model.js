@@ -9,10 +9,12 @@ const planSchema = new Schema({
     isFollowing: {
         type: Boolean,
     },
-    week: {
-        type: Schema.Types.ObjectId,
-        ref: 'Week'
-    }
+    schedule: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Schedule'
+        }
+    ]
 },{
     timestamps: true
 })

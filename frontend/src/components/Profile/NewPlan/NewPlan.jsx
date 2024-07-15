@@ -3,7 +3,8 @@ import { Accordion, AccordionDetails, AccordionSummary, Typography } from "@mui/
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Schedule from "./Schedule";
 
-const Day = ({ day, dayIndex, addMuscle, addExercise, addSet,addDay }) => {
+const Day = ({ day, dayIndex, addMuscle, addExercise, addSet, addDay }) => {
+
   return (
     <div>
       <Accordion>
@@ -17,7 +18,6 @@ const Day = ({ day, dayIndex, addMuscle, addExercise, addSet,addDay }) => {
             paddingX: 4,
             paddingY: 2,
           }}
-          onClick={()=>addDay(day)}
         >
           <Typography sx={{ fontSize: "1.125rem", fontWeight: 800 }}>
             {day}
@@ -59,6 +59,7 @@ const NewPlan = () => {
     setDetails([...details, newEntry]);
   };
   console.log(details)
+  localStorage.setItem("workout",details)
   // Function to add a muscle
   const addMuscle = (dayIndex, muscleName) => {
     const updatedDetails = [...details];

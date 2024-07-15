@@ -18,7 +18,7 @@ const darkTheme = createTheme({
   },
 });
 
-const Schedule = ({ addMuscle, addExercise, addSet, dayIndex, day }) => {
+const Schedule = ({ addMuscle, addExercise, addSet, dayIndex, day, addDay }) => {
   const initialMuscles = [
     "Chest",
     "Back",
@@ -28,51 +28,55 @@ const Schedule = ({ addMuscle, addExercise, addSet, dayIndex, day }) => {
     "Legs",
     "Abs",
   ];
-  const [muscleExercises,setMuscleExercises] = useState([])
-  const [exerciseSets,setExerciseSets] = useState([])
+
   const [muscleGroups, setMuscleGroups] = useState([
-    { value: "", options: initialMuscles },
+    { value: "", options: initialMuscles, exercises: [], sets: [] },
   ]);
-  // console.log("exercises",exercises)
+
   const addMuscleGroup = () => {
     if (muscleGroups.length < 3) {
       setMuscleGroups([
         ...muscleGroups,
-        { value: "", options: initialMuscles },
+        { value: "", options: initialMuscles, exercises: [], sets: [] },
       ]);
     }
   };
 
   const handleMuscleGroupChange = (index, newValue) => {
     const updatedMuscleGroups = muscleGroups.map((muscleGroup, i) =>
-      i === index ? { ...muscleGroup, value: newValue } : muscleGroup
+      i === index ? { ...muscleGroup, value: newValue, exercises: [], sets: [] } : muscleGroup
     );
     setMuscleGroups(updatedMuscleGroups);
   };
 
-  const selectedMuscles = muscleGroups.map((muscleGroup) => muscleGroup.value);
+  const handleExercisesChange = (index, exercises) => {
+    const updatedMuscleGroups = muscleGroups.map((muscleGroup, i) =>
+      i === index ? { ...muscleGroup, exercises } : muscleGroup
+    );
+    setMuscleGroups(updatedMuscleGroups);
+  };
+
+  const handleSetsChange = (index, sets) => {
+    const updatedMuscleGroups = muscleGroups.map((muscleGroup, i) =>
+      i === index ? { ...muscleGroup, sets } : muscleGroup
+    );
+    setMuscleGroups(updatedMuscleGroups);
+  };
 
   const handleAddSchedule = () => {
-    if (selectedMuscles[0] !== "") {
-       // Add the day with selected muscle groups
-      selectedMuscles.forEach((muscle,muscleIndex) => {
-        if (muscle) {
-          addMuscle(dayIndex, muscle);
-          muscleExercises.forEach(exercise => {
-            if(exercise) {
-              addExercise(dayIndex, muscleIndex, exercise)
-              exerciseSets.forEach((set,exerciseIndex)=>{
-                if(set) {
-                  addSet(dayIndex,muscleIndex,exerciseIndex,set);
-                }
-              })
-            }
-          })
-        }
-      });
-    }
+    addDay(day);
+    muscleGroups.forEach((muscleGroup, muscleIndex) => {
+      if (muscleGroup.value) {
+        addMuscle(dayIndex, muscleGroup.value);
+        muscleGroup.exercises.forEach((exercise, exerciseIndex) => {
+          addExercise(dayIndex, muscleIndex, exercise);
+          muscleGroup.sets.forEach((set) => {
+            addSet(dayIndex, muscleIndex, exerciseIndex, set);
+          });
+        });
+      }
+    });
   };
-  
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -110,9 +114,16 @@ const Schedule = ({ addMuscle, addExercise, addSet, dayIndex, day }) => {
             </Stack>
           )}
         </Stack>
-        {selectedMuscles[0] !== "" && (
-          <Exercises setMuscleExercises={setMuscleExercises} setExrciseSets={setExerciseSets} selectedMuscles={selectedMuscles} />
-        )}
+        {muscleGroups.map((muscleGroup, index) => (
+          muscleGroup.value !== "" && (
+            <Exercises
+              key={index}
+              setMuscleExercises={(exercises) => handleExercisesChange(index, exercises)}
+              setExerciseSets={(sets) => handleSetsChange(index, sets)}
+              selectedMuscles={[muscleGroup.value]}
+            />
+          )
+        ))}
         <Box
           sx={{
             position: "absolute",

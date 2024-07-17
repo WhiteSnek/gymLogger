@@ -26,7 +26,7 @@ const darkTheme = createTheme({
 const ParticularMuscleExercise = ({ muscle, muscleIndex, setMuscleExercises }) => {
   const [exercises, setExercises] = useState([]);
   const [exerciseGroups, setExerciseGroups] = useState([{ value: "", sets: [] }]);
-  const [setDetails, setSetDetails] = useState(null);
+  const [setDetails, setSetDetails] = useState({ reps: '', weight: '' });
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -97,11 +97,10 @@ const ParticularMuscleExercise = ({ muscle, muscleIndex, setMuscleExercises }) =
 
   const addExerciseSet = (index) => {
     const updatedExerciseGroups = exerciseGroups.map((exerciseGroup, i) =>
-      i === index ? { ...exerciseGroup, sets: (exerciseGroup.sets.length == 0 ? [setDetails] : [...exerciseGroup.sets, setDetails]) } : exerciseGroup
+      i === index ? { ...exerciseGroup, sets: [...exerciseGroup.sets, setDetails] } : exerciseGroup
     );
     setExerciseGroups(updatedExerciseGroups);
     setMuscleExercises(updatedExerciseGroups);
-    console.log("updated exercise", updatedExerciseGroups)
   };
 
   return (
@@ -144,7 +143,7 @@ const ParticularMuscleExercise = ({ muscle, muscleIndex, setMuscleExercises }) =
   );
 };
 
-const Exercises = ({ selectedMuscles,setMuscleExercises, setExerciseSets }) => {
+const Exercises = ({ selectedMuscles, setMuscleExercises }) => {
   const [adjustedMuscles, setAdjustedMuscles] = useState(selectedMuscles);
 
   useEffect(() => {
@@ -168,7 +167,6 @@ const Exercises = ({ selectedMuscles,setMuscleExercises, setExerciseSets }) => {
             key={index}
             muscle={muscle}
             muscleIndex={index}
-            setExerciseSets={setExerciseSets}
             setMuscleExercises={setMuscleExercises}
           />
         ))}

@@ -176,14 +176,14 @@ const addPlan = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const session = await mongoose.startSession();
   session.startTransaction();
-
+  console.log(planData[0].muscles[0].exercises[0].sets)
   try {
     // Step 1: Create Sets
     const setIds = [];
     for (const schedule of planData) {
       for (const muscle of schedule.muscles) {
         for (const exercise of muscle.exercises) {
-          const sets = await Set.insertMany(exercise.exercise.sets, { session });
+          const sets = await Set.insertMany(exercise.sets, { session });
           if(!sets) throw new ApiError(400,"Error adding sets")
           setIds.push(sets.map(set => set._id));
         }
@@ -197,7 +197,7 @@ const addPlan = asyncHandler(async (req, res) => {
       for (const muscle of schedule.muscles) {
         for (const exercise of muscle.exercises) {
           const newExercise = new Exercise({
-            name: exercise.exercise.value,
+            name: exercise.name,
             sets: setIds[setIndex],
           });
           if(!newExercise) throw new ApiError(400,"Error adding exercise")

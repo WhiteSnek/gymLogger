@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Typography, Modal, Box } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Schedule from "./Schedule";
+import Review from "./Review/Review";
+import axios from "axios";
 
-const Day = ({ day, dayIndex, addMuscle, addExercise, addSet, addDay }) => {
+const Day = ({ day, setDetails }) => {
 
   return (
     <div>
@@ -26,11 +28,7 @@ const Day = ({ day, dayIndex, addMuscle, addExercise, addSet, addDay }) => {
         <AccordionDetails sx={{ backgroundColor: "#3d3d3b" }}>
           <Schedule
             day={day}
-            dayIndex={dayIndex}
-            addMuscle={addMuscle}
-            addExercise={addExercise}
-            addSet={addSet}
-            addDay={addDay}
+            setDetails={setDetails}
           />
         </AccordionDetails>
       </Accordion>
@@ -49,60 +47,66 @@ const NewPlan = () => {
   ];
   
   const [details, setDetails] = useState([]);
-
-  // Function to add a new day
-  const addDay = (newDay) => {
-    const newEntry = {
-      day: newDay,
-      muscles: [],
-    };
-    setDetails([...details, newEntry]);
-  };
+  const [name,setName] = useState('');
   console.log(details)
-  localStorage.setItem("workout",details)
-  // Function to add a muscle
-  const addMuscle = (dayIndex, muscleName) => {
-    const updatedDetails = [...details];
-    updatedDetails[dayIndex].muscles.push({ name: muscleName, exercises: [] });
-    setDetails(updatedDetails);
-  };
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  // Function to add an exercise to a specific muscle
-  const addExercise = (dayIndex, muscleIndex, exercise) => {
-    const updatedDetails = [...details];
-    updatedDetails[dayIndex].muscles[muscleIndex].exercises.push({
-      exercise
-    });
-    setDetails(updatedDetails);
-  };
+  const addPlan = async () => {
+   try {
+     const response = await axios.post('/users/plan',{planName:name,planData:details},{withCredentials:true});
+     console.log(response)
+   } catch (error) {
+    console.log(error)
+   } finally {
+    handleClose();
+   }
+  }
 
-  // Function to add a set to a specific exercise
-  const addSet = (dayIndex, muscleIndex, exerciseIndex, set) => {
-    const updatedDetails = [...details];
-    updatedDetails[dayIndex].muscles[muscleIndex].exercises[exerciseIndex].sets.push({
-      set
-    });
-    setDetails(updatedDetails);
+  const style = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+    color: 'white',
+    maxHeight: '80%',
+  overflowY: 'auto',
   };
-
+  
   return (
-    <div className="flex gap-4 flex-col">
+    <div className="flex gap-4 flex-col p-4">
       {days.map((day, idx) => (
         <Day
           key={idx}
           day={day}
-          dayIndex={idx} // Pass the index of the day
-          addMuscle={addMuscle}
-          addExercise={addExercise}
-          addSet={addSet}
-          addDay={addDay}
+          setDetails={setDetails}
         />
       ))}
       <div className="flex justify-end pb-10">
-        <button className="w-1/4 bg-red-700 px-4 py-2 text-lg mt-4 text-white shadow-xl btn-5">
+        <button onClick={handleOpen} className="w-1/4 bg-red-700 px-4 py-2 text-lg mt-4 text-white shadow-xl btn-5">
           Create Plan
         </button>
       </div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Review Plan
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            <Review days={days} details={details} setName={setName} addPlan={addPlan}/>
+          </Typography>
+        </Box>
+      </Modal>
     </div>
   );
 };

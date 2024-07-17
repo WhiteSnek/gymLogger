@@ -1,12 +1,34 @@
-import React from 'react'
+import React from "react";
+import { Box, Button, Typography } from "@mui/material";
 
-const LogWorkout = ({changeTab}) => {
+const LogWorkout = ({ changeTab }) => {
   return (
-    <div className='flex text-white flex-col justify-center items-center p-4'>
-      You don't have any active plans yet
-      <button onClick={()=>changeTab('new plan')} className='bg-white text-gray-950 py-2 px-4 shadow-lg hover:scale-105 transition-all m-6'>Create a plan</button>
-    </div>
-  )
-}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        p: 4,
+        textAlign: "center",
+        color: "white",
+      }}
+    >
+      <Typography variant="h6">You don't have any active plans yet</Typography>
+      <Button
+        variant="contained"
+        sx={{
+          mt: 2,
+          backgroundColor: "white",
+          color: "black",
+          "&:hover": { backgroundColor: "lightgray" },
+        }}
+        onClick={() => changeTab("new plan")}
+      >
+        Create a plan
+      </Button>
+    </Box>
+  );
+};
 
-export default LogWorkout
+export default LogWorkout;

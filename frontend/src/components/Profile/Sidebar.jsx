@@ -1,57 +1,92 @@
-import React from 'react';
+import React, { act, useState } from 'react';
+import { Drawer, List, ListItem, ListItemText, Divider } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 
-const Sidebar = ({ changeTab }) => {
+const Sidebar = ({ changeTab, activeTab }) => {
   return (
-    <div className='p-4 flex flex-col justify-between h-[85vh] fixed bg-zinc-950 border-4 text-white text-center font-thin border-red-500 m-4 rounded-lg shadow-lg'>
-      <div className='flex flex-col gap-2'>
-        <button
+    <Drawer
+      variant="permanent"
+      anchor="left"
+      sx={{
+        width: 240,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: 240,
+          top: 79,
+          height: 'calc(100% - 79px)',
+        },
+      }}
+    >
+      <List sx={{ paddingTop: 2 }}>
+        <ListItem
+          button
           onClick={() => changeTab('dashboard')}
-          className='py-2 px-4 hover:bg-zinc-800 rounded transition-colors duration-200 text-white'
+          sx={{
+            '&:hover': { backgroundColor: '#374151' },
+            backgroundColor: activeTab === 'dashboard' ? '#4B5563' : 'transparent', // Active item background
+          }}
         >
-          Profile
-        </button>
-        <button 
-          onClick={() => changeTab('log-workout')}
-          className='py-2 px-4 hover:bg-zinc-800 rounded transition-colors duration-200 text-white'
+          <ListItemText primary="Profile" />
+        </ListItem>
+        <ListItem
+          button
+          onClick={() => changeTab('log workout')}
+          sx={{
+            '&:hover': { backgroundColor: '#374151' },
+            backgroundColor: activeTab === 'log workout' ? '#4B5563' : 'transparent',
+          }}
         >
-          Log workout
-        </button>
-        <button 
+          <ListItemText primary="Log Workout" />
+        </ListItem>
+        <ListItem
+          button
           onClick={() => changeTab('new plan')}
-          className='py-2 px-4 hover:bg-zinc-800 rounded transition-colors duration-200 text-white'
+          sx={{
+            '&:hover': { backgroundColor: '#374151' },
+            backgroundColor: activeTab === 'new plan' ? '#4B5563' : 'transparent',
+          }}
         >
-          Create new plan
-        </button>
-        <button 
+          <ListItemText primary="Create New Plan" />
+        </ListItem>
+        <ListItem
+          button
           onClick={() => changeTab('plans')}
-          className='py-2 px-4 hover:bg-zinc-800 rounded transition-colors duration-200 text-white'
+          sx={{
+            '&:hover': { backgroundColor: '#374151' },
+            backgroundColor: activeTab === 'plans' ? '#4B5563' : 'transparent',
+          }}
         >
-          View plans
-        </button>
-        <button 
-          onClick={() => changeTab('pr')}
-          className='py-2 px-4 hover:bg-zinc-800 rounded transition-colors duration-200 text-white'
+          <ListItemText primary="View Plans" />
+        </ListItem>
+        <ListItem
+          button
+          onClick={() => changeTab('Personal Records')}
+          sx={{
+            '&:hover': { backgroundColor: '#374151' },
+            backgroundColor: activeTab === 'Personal Records' ? '#4B5563' : 'transparent',
+          }}
         >
-          View your PRs
-        </button>
-        
-      </div>
-      <div className='flex flex-col'>
-      <NavLink 
-          to='/settings' 
-          className={({ isActive }) => `${isActive ? 'text-red-500' : 'text-white'} py-2 px-4 hover:bg-zinc-800 rounded transition-colors duration-200`}
+          <ListItemText primary="View Your PRs" />
+        </ListItem>
+      </List>
+      <Divider sx={{ backgroundColor: '#F87171', margin: '10px 0' }} />
+      <List sx={{ marginTop: 'auto' }}>
+        <ListItem
+          component={NavLink}
+          to="/settings"
+          style={{ textDecoration: 'none', color: 'inherit' }}
         >
-          Logout
-        </NavLink>
-      <NavLink 
-        to='/settings' 
-        className={({ isActive }) => `${isActive ? 'text-red-500' : 'text-white'} py-2 px-4 hover:bg-zinc-800 rounded transition-colors duration-200`}
-      >
-        Settings
-      </NavLink>
-      </div>
-    </div>
+          <ListItemText primary="Settings" />
+        </ListItem>
+        <ListItem
+          component={NavLink}
+          to="/logout"
+          style={{ textDecoration: 'none', color: 'inherit' }}
+        >
+          <ListItemText primary="Logout" />
+        </ListItem>
+      </List>
+    </Drawer>
   );
 }
 
